@@ -1,29 +1,14 @@
 #-------------------------------------------------------------------------------------------
 # Copyright (C) Electronic Arts Inc.  All rights reserved.
 #-------------------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 project(EATest CXX)
-
-#-------------------------------------------------------------------------------------------
-# Options
-#-------------------------------------------------------------------------------------------
-option(EATEST_BUILD_TESTS "Enable generation of build files for tests" OFF)
-
-#-------------------------------------------------------------------------------------------
-# Compiler Flags
-#-------------------------------------------------------------------------------------------
-set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/test/packages/EASTL/scripts/CMake")
-include(CommonCppFlags)
 
 #-------------------------------------------------------------------------------------------
 # Library definition
 #-------------------------------------------------------------------------------------------
 file(GLOB EATEST_SOURCES "source/*.cpp")
 add_library(EATest ${EATEST_SOURCES})
-
-if(EATEST_BUILD_TESTS)
-    add_subdirectory(test)
-endif()
 
 #-------------------------------------------------------------------------------------------
 # Defines
