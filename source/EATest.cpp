@@ -37,7 +37,7 @@
     extern "C" WINBASEAPI BOOL WINAPI IsDebuggerPresent();
 
     #if EA_WINAPI_FAMILY_PARTITION(EA_WINAPI_PARTITION_DESKTOP) && !defined(EA_COMPILER_CLANG)
-        #pragma comment(lib, "Advapi32.lib"); // For CheckTokenMembership and friends.
+        #pragma comment(lib, "Advapi32.lib") // For CheckTokenMembership and friends.
     #endif
 
 #elif defined(__APPLE__)    // OS X, iPhone, iPad, etc.
@@ -97,7 +97,7 @@ namespace UnitTest
             if(!bExpression)
             {
                 nErrorCount++;
-                EA::EAMain::Report("%s(%d): %s\n", pFile, nLine, pMessage);
+                EA::EAMain::Report(EA_CHAR8("%s(%d): %s\n"), pFile, nLine, pMessage);
             }
 
             return bExpression ? 0 : 1;
@@ -229,7 +229,7 @@ EATEST_API void Report(const char* pFormat, ...)
 {
     va_list arguments;
     va_start(arguments, pFormat);
-    EA::EAMain::VReport(pFormat, arguments);
+    EA::EAMain::VReport((const char8_t*)pFormat, arguments);
     va_end(arguments);
 }
 
@@ -240,7 +240,7 @@ EATEST_API void ReportVerbosity(unsigned minVerbosity, const char* pFormat, ...)
 {
     va_list arguments;
     va_start(arguments, pFormat);
-    EA::EAMain::VReportVerbosity(minVerbosity, pFormat, arguments);
+    EA::EAMain::VReportVerbosity(minVerbosity, (const char8_t*)pFormat, arguments);
     va_end(arguments);
 }
 
@@ -425,7 +425,7 @@ EATEST_API unsigned ThreadSleepRandom(unsigned nMinSleepMS, unsigned nMaxSleepMS
         {
             nLastReportTime = nCurrentTime;
             if(bVerboseOutput)
-                EA::EAMain::Report(".\n");
+                EA::EAMain::Report(EA_CHAR8(".\n"));
         }
 
         EA::Thread::ThreadSleep(nThreadSleepDuration);
@@ -464,8 +464,8 @@ EATEST_API bool Verify(bool bValue, const char* pMessage, Test* pTestContext)
         pTestContext->Verify(bValue, pMessage);
     else if(!bValue && gpReportFunction)
     {
-        gpReportFunction(pMessage);
-        gpReportFunction("\n");
+        gpReportFunction((const char8_t*)pMessage);
+        gpReportFunction(EA_CHAR8("\n"));
     }
 
     return bValue;
@@ -821,10 +821,10 @@ bool Test::Verify(bool bValue, const char* pMessage)
         {
             // Print out a string like this:
             //     MathTest: Failure of quaternion initialization.
-            gpReportFunction(msTestName.c_str());
-            gpReportFunction(": ");
-            gpReportFunction(pMessage);
-            gpReportFunction("\n");
+            gpReportFunction((const char8_t*)msTestName.c_str());
+            gpReportFunction(EA_CHAR8(": "));
+            gpReportFunction((const char8_t*)pMessage);
+            gpReportFunction(EA_CHAR8("\n"));
         }
         return false;
     }
@@ -863,7 +863,7 @@ void Test::WriteReport()
         char buffer[384];
         EA::EAMain::ReportFunction pReportFunction = GetReportFunction();
         EA::StdC::Sprintf(buffer, "%-24s - %s \t%2.4f secs\n", msTestName.c_str(), mnErrorCount ? "FAILED" : "PASSED", mnElapsedTestTimeInMicroseconds / 1000000.f);
-        pReportFunction(buffer);
+        pReportFunction((const char8_t*)buffer);
     }
 }
 
@@ -1120,7 +1120,7 @@ void TestSuite::Run(ResultInfo& resultInfo)
                 // Really I would like to report at level 1 so this trace does not
                 // appear by default but all users trace is already at 1 and 
                 // would need changing as well.
-                EA::EAMain::ReportVerbosity(0, "Running test [%s]\n", resultInfo.mpTest->msTestName.c_str());
+                EA::EAMain::ReportVerbosity(0, EA_CHAR8("Running test [%s]\n"), resultInfo.mpTest->msTestName.c_str());
 
                 if(SetupTest() != kTestResultOK)
                 {
@@ -1217,7 +1217,7 @@ int TestSuite::RunTest(const char* pName)
     TestInfo* const pTestInfo = FindTestInfo(pName, true);
     if(!pTestInfo)
     {
-        EA::EAMain::Report("Error: Unable to recognize test %s\n", pName);
+        EA::EAMain::Report(EA_CHAR8("Error: Unable to recognize test %s\n"), pName);
         return kTestResultError;
     }
 
@@ -1314,7 +1314,7 @@ void TestSuite::WriteReport()
         buffer[kMaxHeaderWidth + 1] = '\n';
         buffer[kMaxHeaderWidth + 2] = 0;
 
-        pReportFunction(buffer);
+        pReportFunction((const char8_t*)buffer);
 
         // Print test results
         for(ResultArray::iterator it(mResults.begin()); it != mResults.end(); ++it)
@@ -1326,7 +1326,7 @@ void TestSuite::WriteReport()
             {
                 eastl::string sName;
                 pTest->GetName(sName);
-                EA::EAMain::Report("Test not run: %s\n", sName.c_str());
+                EA::EAMain::Report(EA_CHAR8("Test not run: %s\n"), sName.c_str());
             }
             else
             {
@@ -1343,7 +1343,7 @@ void TestSuite::WriteReport()
             buffer[i] = '-'; // Buffer overflow checking not done here.
         buffer[i++] = '\n';
         buffer[i] = 0;
-        pReportFunction(buffer);
+        pReportFunction((const char8_t*)buffer);
     }
 }
 
@@ -1467,7 +1467,7 @@ int TestApplication::Run()
 
             if(!bPrintfOccurred)
             {
-                EA::EAMain::Report("Waiting for debugger to attach...\n");
+                EA::EAMain::Report(EA_CHAR8("Waiting for debugger to attach...\n"));
                 bPrintfOccurred = true;
             }
 
@@ -1604,17 +1604,17 @@ Cleanup:
     // Report on all the tests we run.
     if(bReport)
     {
-        EA::EAMain::Report("\n");
-        EA::EAMain::Report("Tests are complete.\n");
-        EA::EAMain::Report("Run count: %d.\n", nTestCount);
-        EA::EAMain::Report("Result: %s (code %d).\n", (nTestResult == kTestResultOK) ? "success" : "failure", nTestResult);
+        EA::EAMain::Report(EA_CHAR8("\n"));
+        EA::EAMain::Report(EA_CHAR8("Tests are complete.\n"));
+        EA::EAMain::Report(EA_CHAR8("Run count: %d.\n"), nTestCount);
+        EA::EAMain::Report(EA_CHAR8("Result: %s (code %d).\n"), (nTestResult == kTestResultOK) ? "success" : "failure", nTestResult);
     }
     else if(nTestCount == 0)
-        EA::EAMain::Report("Run count: 0 (nothing was run).\n");
+        EA::EAMain::Report(EA_CHAR8("Run count: 0 (nothing was run).\n"));
 
     if(bWait)
     {
-        EA::EAMain::Report("\nPress any key to exit.\n");
+        EA::EAMain::Report(EA_CHAR8("\nPress any key to exit.\n"));
         char c = (char)getchar();
         EA_UNUSED(c);
     }
@@ -1633,29 +1633,29 @@ void TestApplication::PrintUsage()
     if(mTests.size() >= 2)
         mTests[1].mpTest->GetName(sTestName2); 
 
-    EA::EAMain::Report("%s\n\n", msTestName.c_str());
-    EA::EAMain::Report("Available arguments:\n");
-    EA::EAMain::Report("    -help / -h / -?         Displays this usage information\n");
-    EA::EAMain::Report("    -list                   Displays a list of available tests\n");
-    EA::EAMain::Report("    -listDetail             Displays a detailed list of available tests\n");
-    EA::EAMain::Report("    -run:<TestName>         Runs a specific test\n");
-    EA::EAMain::Report("    -verbose / -v           Causes all debug traces to be visible, including those that are merely informational.\n");
-    EA::EAMain::Report("    -interactive / -i       Sets the test as being an attended run as opposed to being automated and unattended.\n");
-    EA::EAMain::Report("    -randSeed / -r:<value>  Sets the global random number seed value which test code can use.\n");
-    EA::EAMain::Report("    -debugBreak             Causes EATEST_DEBUG_BREAK to immediately be called. Useful for\n");
-    EA::EAMain::Report("                            debugging in some situations. Can be combined with -debugWait.\n");
-    EA::EAMain::Report("    -debugWait              Causes the app to loop before proceeding, while waiting for a\n");
-    EA::EAMain::Report("                            debugger to attach. Can be combined with -debugBreak.\n");
-    EA::EAMain::Report("    -wait / -w              Waits for user confirmation before app exit. Shouldn't be used if the\n");
-    EA::EAMain::Report("                            run is unattended (i.e. non-interactive)\n");
-    EA::EAMain::Report("\n");
-    EA::EAMain::Report("Example usage:\n");
-    EA::EAMain::Report("    %s -list -wait -randSeed:12345\n", sAppName.c_str());
-    EA::EAMain::Report("    %s -run:%s -run:%s\n", sAppName.c_str(), sTestName1.c_str(), sTestName2.c_str());
-    EA::EAMain::Report("    %s -run:%s -run:%s -verbose -i\n", sAppName.c_str(), sTestName1.c_str(), sTestName2.c_str());
-    EA::EAMain::Report("\nAvailable tests:\n");
+    EA::EAMain::Report(EA_CHAR8("%s\n\n"), msTestName.c_str());
+    EA::EAMain::Report(EA_CHAR8("Available arguments:\n"));
+    EA::EAMain::Report(EA_CHAR8("    -help / -h / -?         Displays this usage information\n"));
+    EA::EAMain::Report(EA_CHAR8("    -list                   Displays a list of available tests\n"));
+    EA::EAMain::Report(EA_CHAR8("    -listDetail             Displays a detailed list of available tests\n"));
+    EA::EAMain::Report(EA_CHAR8("    -run:<TestName>         Runs a specific test\n"));
+    EA::EAMain::Report(EA_CHAR8("    -verbose / -v           Causes all debug traces to be visible, including those that are merely informational.\n"));
+    EA::EAMain::Report(EA_CHAR8("    -interactive / -i       Sets the test as being an attended run as opposed to being automated and unattended.\n"));
+    EA::EAMain::Report(EA_CHAR8("    -randSeed / -r:<value>  Sets the global random number seed value which test code can use.\n"));
+    EA::EAMain::Report(EA_CHAR8("    -debugBreak             Causes EATEST_DEBUG_BREAK to immediately be called. Useful for\n"));
+    EA::EAMain::Report(EA_CHAR8("                            debugging in some situations. Can be combined with -debugWait.\n"));
+    EA::EAMain::Report(EA_CHAR8("    -debugWait              Causes the app to loop before proceeding, while waiting for a\n"));
+    EA::EAMain::Report(EA_CHAR8("                            debugger to attach. Can be combined with -debugBreak.\n"));
+    EA::EAMain::Report(EA_CHAR8("    -wait / -w              Waits for user confirmation before app exit. Shouldn't be used if the\n"));
+    EA::EAMain::Report(EA_CHAR8("                            run is unattended (i.e. non-interactive)\n"));
+    EA::EAMain::Report(EA_CHAR8("\n"));
+    EA::EAMain::Report(EA_CHAR8("Example usage:\n"));
+    EA::EAMain::Report(EA_CHAR8("    %s -list -wait -randSeed:12345\n"), sAppName.c_str());
+    EA::EAMain::Report(EA_CHAR8("    %s -run:%s -run:%s\n"), sAppName.c_str(), sTestName1.c_str(), sTestName2.c_str());
+    EA::EAMain::Report(EA_CHAR8("    %s -run:%s -run:%s -verbose -i\n"), sAppName.c_str(), sTestName1.c_str(), sTestName2.c_str());
+    EA::EAMain::Report(EA_CHAR8("\nAvailable tests:\n"));
     PrintTestNames(true);
-    EA::EAMain::Report("\n");
+    EA::EAMain::Report(EA_CHAR8("\n"));
 }
 
 
@@ -1681,7 +1681,7 @@ void TestApplication::PrintTestNames(bool /*bDetail*/)
         Test* const pTest = mTests[i].mpTest;
 
         pTest->GetName(sName);
-        EA::EAMain::Report("   %s\n", sName.c_str());
+        EA::EAMain::Report(EA_CHAR8("   %s\n"), sName.c_str());
     }
 }
 

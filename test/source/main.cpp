@@ -47,7 +47,7 @@ void operator delete[] (void* ptr) EA_THROW_SPEC_DELETE_NONE()
 class Test1 : public EA::UnitTest::Test
 {
 public:
-    Test1(const char8_t* pTestName, bool bShouldSucceed = true) 
+    Test1(const char* pTestName, bool bShouldSucceed = true) 
       : Test(pTestName), mnRunCount(10), mbShouldSucceed(bShouldSucceed) {}
 
     int Run()
@@ -75,7 +75,7 @@ public:
 class Test2 : public EA::UnitTest::Test
 {
 public:
-    Test2(const char8_t* pTestName, bool bShouldSucceed = true) 
+    Test2(const char* pTestName, bool bShouldSucceed = true) 
         : Test(pTestName), mnRunCount(10), mbShouldSucceed(bShouldSucceed) {}
 
     int Run()
