@@ -745,7 +745,8 @@ Test::Test(const char* pTestName, EA::EAMain::ReportFunction pReportFunction)
     mnSuccessCount(0),
     mnErrorCount(0),
     mpReportFunction(pReportFunction),
-    mbForceReport(false)
+    mbForceReport(false),
+    mnElapsedTestTimeInMicroseconds(0)
 {
     // Empty
 }
